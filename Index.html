@@ -3,66 +3,119 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>MILTAPE</title>
+<title>MILTAPE PRO</title>
 <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
 body{background:#0a0515;display:flex;justify-content:center;min-height:100vh;padding:10px}
 .container{max-width:450px;width:100%;background:linear-gradient(180deg,#1a0a2e,#0a0515);border-radius:20px;padding:20px;border:1px solid #b72cff;box-shadow:0 0 40px rgba(183,44,255,.2)}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.logo{color:#fff;font-size:24px;font-weight:900;background:linear-gradient(135deg,#b72cff,#ff6b2c);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.score{color:#ffd42e;font-weight:700;font-size:14px;background:rgba(255,255,255,.05);padding:6px 12px;border-radius:12px;border:1px solid rgba(255,212,46,.2)}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+.logo{color:#fff;font-size:20px;font-weight:900;background:linear-gradient(135deg,#b72cff,#ff6b2c);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header-right{display:flex;align-items:center;gap:8px}
+.score{color:#ffd42e;font-weight:700;font-size:12px;background:rgba(255,255,255,.05);padding:4px 10px;border-radius:10px;border:1px solid rgba(255,212,46,.2)}
+.sub-badge{padding:4px 10px;border-radius:10px;font-size:10px;font-weight:700}
+.sub-free{background:#444;color:#888}
+.sub-basic{background:#2196F3;color:#fff}
+.sub-premium{background:#9C27B0;color:#fff}
+.sub-vip{background:linear-gradient(135deg,#FFD700,#FF6B00);color:#000}
 
-.tap-zone{text-align:center;padding:30px 0}
-.tap-btn{width:200px;height:200px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#6a1b9a,#2a0a4a);border:3px solid #b72cff;box-shadow:0 0 60px rgba(183,44,255,.3);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto;transition:transform .1s;user-select:none;-webkit-tap-highlight-color:transparent}
+.tap-zone{text-align:center;padding:20px 0}
+.tap-btn{width:180px;height:180px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#6a1b9a,#2a0a4a);border:3px solid #b72cff;box-shadow:0 0 60px rgba(183,44,255,.3);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto;transition:transform .1s;user-select:none;position:relative}
 .tap-btn:active{transform:scale(.94)}
-.tap-btn .icon{font-size:60px;color:#fff;text-shadow:0 0 30px rgba(183,44,255,.5)}
-.tap-btn .label{color:#fff;font-size:14px;margin-top:8px;opacity:.7}
-.tap-btn .count{position:absolute;margin-top:130px;background:#08040d;border:2px solid #ffd12b;border-radius:20px;padding:4px 16px;color:#ffd42e;font-weight:900;font-size:18px}
+.tap-btn .icon{font-size:50px;color:#fff;text-shadow:0 0 30px rgba(183,44,255,.5)}
+.tap-btn .label{color:#fff;font-size:12px;margin-top:5px;opacity:.7}
+.tap-btn .count{margin-top:8px;background:#08040d;border:2px solid #ffd12b;border-radius:20px;padding:3px 14px;color:#ffd42e;font-weight:900;font-size:16px}
+.tap-btn.locked{opacity:.5;cursor:not-allowed}
+.tap-btn.locked:active{transform:none}
+.tap-btn .lock-icon{position:absolute;top:-10px;right:-10px;font-size:24px}
 
-.leaderboard{background:rgba(0,0,0,.4);border-radius:12px;padding:12px;margin:20px 0;border:1px solid rgba(183,44,255,.15)}
-.leaderboard h3{color:#b78fff;font-size:12px;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px}
-.lb-item{display:flex;justify-content:space-between;padding:6px 0;color:#fff;font-size:13px;border-bottom:1px solid rgba(255,255,255,.05)}
+.pricing{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:15px 0}
+.price-card{background:rgba(0,0,0,.4);border-radius:12px;padding:12px;text-align:center;border:1px solid rgba(183,44,255,.15);cursor:pointer;transition:all .3s}
+.price-card:hover{transform:scale(1.02)}
+.price-card.selected{border-color:#ffd12b;background:rgba(255,209,43,.1)}
+.price-card .level{font-size:11px;color:#888;font-weight:700;text-transform:uppercase}
+.price-card .amount{font-size:20px;font-weight:900;color:#ffd42e;margin:4px 0}
+.price-card .desc{font-size:9px;color:#666}
+
+.leaderboard{background:rgba(0,0,0,.4);border-radius:12px;padding:12px;margin:15px 0;border:1px solid rgba(183,44,255,.15);max-height:200px;overflow-y:auto}
+.leaderboard h3{color:#b78fff;font-size:11px;text-transform:uppercase;letter-spacing:2px;margin-bottom:6px}
+.lb-item{display:flex;justify-content:space-between;padding:4px 0;color:#fff;font-size:12px;border-bottom:1px solid rgba(255,255,255,.05)}
 .lb-item .rank{color:#b78fff;font-weight:700;min-width:30px}
 .lb-item .name{flex:1;margin-left:8px}
 .lb-item .score{color:#ffd42e;font-weight:700}
+.lb-item .badge{font-size:8px;padding:1px 6px;border-radius:8px;margin-left:6px}
 
-.player-info{display:flex;justify-content:space-between;background:rgba(0,0,0,.3);border-radius:12px;padding:10px;margin:10px 0;border:1px solid rgba(183,44,255,.1)}
+.player-info{display:flex;justify-content:space-between;background:rgba(0,0,0,.3);border-radius:12px;padding:8px 12px;margin:10px 0;border:1px solid rgba(183,44,255,.1)}
 .pi-item{text-align:center;flex:1}
-.pi-item .label{color:#888;font-size:9px;text-transform:uppercase}
-.pi-item .value{color:#fff;font-weight:700;font-size:14px;margin-top:2px}
+.pi-item .label{color:#888;font-size:8px;text-transform:uppercase}
+.pi-item .value{color:#fff;font-weight:700;font-size:13px;margin-top:2px}
 
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;align-items:center;justify-content:center;padding:20px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:100;align-items:center;justify-content:center;padding:20px}
 .modal.show{display:flex}
-.modal-box{background:linear-gradient(145deg,#1a0a2e,#0a0515);border:1px solid #b72cff;border-radius:20px;padding:24px;max-width:400px;width:100%;color:#fff}
-.modal-box h2{text-align:center;margin-bottom:20px;background:linear-gradient(135deg,#b72cff,#ff6b2c);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.modal-input{width:100%;padding:12px;margin:8px 0;border-radius:10px;border:1px solid #4c3159;background:#07040c;color:#fff;font-size:14px;outline:none}
-.modal-btn{width:100%;padding:14px;margin-top:12px;border:0;border-radius:12px;background:linear-gradient(135deg,#ffd633,#ff9900);font-weight:900;font-size:16px;color:#1a0a2e;cursor:pointer}
+.modal-box{background:linear-gradient(145deg,#1a0a2e,#0a0515);border:1px solid #b72cff;border-radius:20px;padding:24px;max-width:400px;width:100%;color:#fff;max-height:90vh;overflow-y:auto}
+.modal-box h2{text-align:center;margin-bottom:15px;background:linear-gradient(135deg,#b72cff,#ff6b2c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:18px}
+.modal-input{width:100%;padding:10px;margin:6px 0;border-radius:10px;border:1px solid #4c3159;background:#07040c;color:#fff;font-size:13px;outline:none}
+.modal-input:focus{border-color:#b72cff}
+.modal-btn{width:100%;padding:12px;margin-top:10px;border:0;border-radius:12px;background:linear-gradient(135deg,#ffd633,#ff9900);font-weight:900;font-size:15px;color:#1a0a2e;cursor:pointer}
 .modal-close{float:right;background:none;border:0;color:#fff;font-size:24px;cursor:pointer}
+.modal-section{margin:12px 0}
+.modal-section .title{font-size:12px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
 
-.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:200;background:#1a0a2e;border:1px solid #b72cff;color:#fff;padding:12px 24px;border-radius:12px;display:none;font-weight:600}
+.pay-btn{width:100%;padding:12px;margin:4px 0;border-radius:10px;border:1px solid #4c3159;background:#09050f;color:#fff;text-align:center;cursor:pointer;font-weight:600;transition:all .2s}
+.pay-btn:hover{background:rgba(183,44,255,.1)}
+.pay-btn.selected{border-color:#ffd12b;background:rgba(255,209,43,.1)}
+.pay-btn .price{color:#ffd42e;font-weight:900;float:right}
 
-.nav{display:flex;margin-top:15px;gap:10px}
-.nav-btn{flex:1;padding:12px;border:1px solid rgba(183,44,255,.2);border-radius:12px;background:transparent;color:#888;font-size:11px;text-align:center;cursor:pointer}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:200;background:#1a0a2e;border:1px solid #b72cff;color:#fff;padding:12px 20px;border-radius:12px;display:none;font-weight:600;font-size:13px;max-width:90%;text-align:center}
+
+.nav{display:flex;margin-top:12px;gap:8px}
+.nav-btn{flex:1;padding:10px;border:1px solid rgba(183,44,255,.2);border-radius:12px;background:transparent;color:#888;font-size:10px;text-align:center;cursor:pointer}
 .nav-btn.active{color:#b72cff;border-color:#b72cff}
 
-.tap-particle{position:fixed;pointer-events:none;z-index:50;font-size:24px;font-weight:900;color:#ffd42e;text-shadow:0 0 20px rgba(255,212,46,.5)}
-@keyframes particleUp{to{transform:translateY(-80px);opacity:0}}
+.tap-particle{position:fixed;pointer-events:none;z-index:50;font-size:20px;font-weight:900;color:#ffd42e;text-shadow:0 0 20px rgba(255,212,46,.5)}
+@keyframes particleUp{to{transform:translateY(-70px);opacity:0}}
+
+.scrollable{max-height:300px;overflow-y:auto}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#b72cff;border-radius:2px}
 </style>
 </head>
 <body>
 
 <div class="container" id="app">
   <div class="header">
-    <span class="logo">✦ MILTAPE</span>
-    <span class="score" id="totalTaps">0 taps</span>
+    <span class="logo">✦ MILTAPE PRO</span>
+    <div class="header-right">
+      <span class="score" id="totalTaps">0 taps</span>
+      <span class="sub-badge sub-free" id="subBadge">FREE</span>
+    </div>
   </div>
 
   <div class="tap-zone">
-    <div class="tap-btn" id="tapBtn">
+    <div class="tap-btn locked" id="tapBtn">
+      <div class="lock-icon">🔒</div>
       <div class="icon">⚡</div>
-      <div class="label">TAPE ICI</div>
+      <div class="label">DÉBLOQUEZ LE JEU</div>
       <div class="count" id="tapCount">0</div>
+    </div>
+  </div>
+
+  <div class="pricing" id="pricing">
+    <div class="price-card selected" data-level="basic" onclick="selectPrice(this)">
+      <div class="level">BASIC</div>
+      <div class="amount">1.99$</div>
+      <div class="desc">♾️ Taps illimités</div>
+    </div>
+    <div class="price-card" data-level="premium" onclick="selectPrice(this)">
+      <div class="level">PREMIUM</div>
+      <div class="amount">4.99$</div>
+      <div class="desc">⭐ ×2 points<br>👑 Badge</div>
+    </div>
+    <div class="price-card" data-level="vip" onclick="selectPrice(this)">
+      <div class="level">VIP</div>
+      <div class="amount">9.99$</div>
+      <div class="desc">🔥 ×3 points<br>🏆 Badge or<br>🎁 Accès exclusif</div>
     </div>
   </div>
 
@@ -75,6 +128,10 @@ body{background:#0a0515;display:flex;justify-content:center;min-height:100vh;pad
       <div class="label">🏆 Rang</div>
       <div class="value" id="playerRank">—</div>
     </div>
+    <div class="pi-item">
+      <div class="label">💳 Abonnement</div>
+      <div class="value" id="playerSub">—</div>
+    </div>
   </div>
 
   <div class="leaderboard">
@@ -84,17 +141,54 @@ body{background:#0a0515;display:flex;justify-content:center;min-height:100vh;pad
 
   <div class="nav">
     <button class="nav-btn active" onclick="openModal()">🎮 JOUER</button>
+    <button class="nav-btn" onclick="openPayment()">💳 PAYER</button>
     <button class="nav-btn" onclick="shareGame()">📤 PARTAGER</button>
   </div>
 </div>
 
+<!-- Modal Principal -->
 <div class="modal" id="modal">
   <div class="modal-box">
     <button class="modal-close" onclick="closeModal()">×</button>
     <h2>🎮 COMMENCER</h2>
     <input class="modal-input" id="nameInput" placeholder="Ton pseudo" maxlength="15">
     <input class="modal-input" id="walletInput" placeholder="Adresse TRON (optionnel)">
-    <button class="modal-btn" onclick="registerUser()">🚀 LANCER</button>
+    <div class="modal-section">
+      <div class="title">💳 Méthode de paiement</div>
+      <div class="pay-btn selected" data-method="tron" onclick="selectPayMethod(this)">
+        🔶 TRON (USDT) <span class="price">✓</span>
+      </div>
+      <div class="pay-btn" data-method="telegram" onclick="selectPayMethod(this)">
+        ✈️ Telegram <span class="price">✓</span>
+      </div>
+    </div>
+    <button class="modal-btn" onclick="registerUser()">🚀 LANCER LE JEU</button>
+    <div style="text-align:center;margin-top:10px;font-size:10px;color:#666">
+      Paiement sécurisé • 1 mois d'abonnement
+    </div>
+  </div>
+</div>
+
+<!-- Modal Paiement -->
+<div class="modal" id="paymentModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closePaymentModal()">×</button>
+    <h2>💳 PAIEMENT</h2>
+    <div id="paymentContent">
+      <p style="color:#888;font-size:13px;text-align:center;margin:10px 0">
+        Envoyez <strong id="payAmount">1.99 USDT</strong> sur l'adresse ci-dessous
+      </p>
+      <div style="background:#07040c;border:1px solid #4c3159;border-radius:10px;padding:12px;word-break:break-all;font-size:11px;color:#b78fff;text-align:center" id="walletDisplay">
+        Chargement...
+      </div>
+      <button class="modal-btn" onclick="copyWallet()" style="margin-top:8px">📋 COPIER L'ADRESSE</button>
+      <div style="margin-top:12px">
+        <input class="modal-input" id="txHashInput" placeholder="Hash de la transaction TRON">
+      </div>
+      <button class="modal-btn" onclick="verifyPayment()" style="background:linear-gradient(135deg,#4CAF50,#2E7D32);color:#fff">
+        ✅ VÉRIFIER LE PAIEMENT
+      </button>
+    </div>
   </div>
 </div>
 
@@ -104,8 +198,14 @@ body{background:#0a0515;display:flex;justify-content:center;min-height:100vh;pad
 const socket = io(window.location.origin);
 let currentUser = null;
 let tapCount = 0;
-let leaderboardData = [];
+let selectedPrice = 'basic';
+let selectedMethod = 'tron';
+let userData = null;
 
+// --- Prix ---
+const PRICES = { basic: 1.99, premium: 4.99, vip: 9.99 };
+
+// --- Socket ---
 socket.on('connect', () => {
   console.log('✅ Connecté');
   socket.emit('get_leaderboard');
@@ -113,7 +213,6 @@ socket.on('connect', () => {
 });
 
 socket.on('leaderboard_update', (data) => {
-  leaderboardData = data;
   updateLeaderboard(data);
 });
 
@@ -133,55 +232,105 @@ socket.on('error', (data) => {
   showToast('❌ ' + (data.message || 'Erreur'));
 });
 
+// --- UI ---
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.style.display = 'block';
   clearTimeout(window._t);
-  window._t = setTimeout(() => t.style.display = 'none', 2500);
+  window._t = setTimeout(() => t.style.display = 'none', 3000);
 }
 
 function openModal() { document.getElementById('modal').classList.add('show'); }
 function closeModal() { document.getElementById('modal').classList.remove('show'); }
 
+function openPayment() {
+  if (!currentUser) { showToast('📝 Créez votre compte d\'abord !'); openModal(); return; }
+  document.getElementById('paymentModal').classList.add('show');
+  document.getElementById('payAmount').textContent = `${PRICES[selectedPrice] || 1.99} USDT`;
+  loadWallet();
+}
+function closePaymentModal() { document.getElementById('paymentModal').classList.remove('show'); }
+
+function selectPrice(el) {
+  document.querySelectorAll('.price-card').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedPrice = el.dataset.level;
+}
+
+function selectPayMethod(el) {
+  document.querySelectorAll('.pay-btn').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedMethod = el.dataset.method;
+}
+
 function shareGame() {
+  const text = '🎮 MILTAPE PRO - Le jeu de tap ultime !\nRejoins-moi : ' + window.location.href;
   if (navigator.share) {
-    navigator.share({ title: 'MILTAPE', text: '🎮 Rejoins MILTAPE !\n' + window.location.href });
+    navigator.share({ title: 'MILTAPE PRO', text: text });
   } else if (navigator.clipboard) {
-    navigator.clipboard.writeText(window.location.href).then(() => showToast('📋 Lien copié !'));
+    navigator.clipboard.writeText(text).then(() => showToast('📋 Lien copié !'));
   } else {
-    showToast('📋 ' + window.location.href);
+    showToast('📋 ' + text.substring(0, 50) + '...');
   }
 }
 
+// --- Leaderboard ---
 function updateLeaderboard(data) {
   const container = document.getElementById('leaderboardList');
   let html = '';
   (data || []).slice(0, 10).forEach((item, i) => {
     const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`;
     const isMe = item.name === currentUser;
+    const badge = item.subscription === 'vip' ? '👑' : 
+                  item.subscription === 'premium' ? '⭐' : 
+                  item.subscription === 'basic' ? '💎' : '';
     html += `<div class="lb-item" style="${isMe ? 'background:rgba(255,212,46,.05);border-radius:4px;' : ''}">
       <span class="rank">${medal}</span>
-      <span class="name">${item.name}</span>
+      <span class="name">${item.name} ${badge}</span>
       <span class="score">${item.tapCount}</span>
     </div>`;
   });
-  if (!html) html = '<div style="color:#666;text-align:center;padding:12px">Aucun joueur</div>';
+  if (!html) html = '<div style="color:#666;text-align:center;padding:10px">Aucun joueur</div>';
   container.innerHTML = html;
 }
 
+// --- Player Info ---
 function updatePlayerInfo() {
   if (currentUser) {
     document.getElementById('playerName').textContent = currentUser;
     document.getElementById('tapCount').textContent = tapCount;
+    
     const idx = leaderboardData.findIndex(i => i.name === currentUser);
     document.getElementById('playerRank').textContent = idx !== -1 ? `#${idx+1}` : '—';
+    
+    // Mise à jour du badge d'abonnement
+    const sub = userData?.subscription || 'free';
+    const badge = document.getElementById('subBadge');
+    badge.textContent = sub.toUpperCase();
+    badge.className = `sub-badge sub-${sub}`;
+    
+    document.getElementById('playerSub').textContent = sub.toUpperCase();
+    
+    // Déverrouiller le jeu si payant
+    if (userData?.isPaid) {
+      const btn = document.getElementById('tapBtn');
+      btn.classList.remove('locked');
+      btn.querySelector('.lock-icon').style.display = 'none';
+      btn.querySelector('.label').textContent = 'TAPE ICI';
+    }
   }
 }
 
+// --- Tap ---
 document.getElementById('tapBtn').addEventListener('pointerdown', function(e) {
   e.preventDefault();
   if (!currentUser) { openModal(); return; }
+  if (!userData?.isPaid) { 
+    showToast('💳 Payez pour jouer !');
+    openPayment();
+    return;
+  }
 
   this.style.transform = 'scale(.92)';
   setTimeout(() => this.style.transform = 'scale(1)', 100);
@@ -203,6 +352,72 @@ document.getElementById('tapBtn').addEventListener('pointerdown', function(e) {
   document.getElementById('tapCount').textContent = tapCount;
 });
 
+// --- Wallet ---
+async function loadWallet() {
+  try {
+    const res = await fetch('/api/payment/initiate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userName: currentUser,
+        amount: PRICES[selectedPrice],
+        method: selectedMethod
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('walletDisplay').textContent = data.walletAddress;
+      document.getElementById('walletDisplay').dataset.tx = data.transaction?._id;
+    } else {
+      showToast('❌ Erreur de chargement du wallet');
+    }
+  } catch (error) {
+    showToast('❌ Erreur de connexion');
+  }
+}
+
+function copyWallet() {
+  const addr = document.getElementById('walletDisplay').textContent;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(addr).then(() => showToast('📋 Adresse copiée !'));
+  } else {
+    showToast('📋 ' + addr);
+  }
+}
+
+async function verifyPayment() {
+  const txHash = document.getElementById('txHashInput').value.trim();
+  if (!txHash) { showToast('📝 Entrez le hash de la transaction'); return; }
+  
+  try {
+    const res = await fetch('/api/payment/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userName: currentUser,
+        txHash: txHash,
+        amount: PRICES[selectedPrice]
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('✅ Paiement confirmé !');
+      closePaymentModal();
+      // Mettre à jour les données utilisateur
+      userData.isPaid = true;
+      userData.subscription = data.subscription;
+      updatePlayerInfo();
+      // Mettre à jour le classement
+      socket.emit('get_leaderboard');
+    } else {
+      showToast('❌ ' + (data.error || 'Paiement non confirmé'));
+    }
+  } catch (error) {
+    showToast('❌ Erreur de vérification');
+  }
+}
+
+// --- Register ---
 async function registerUser() {
   const name = document.getElementById('nameInput').value.trim();
   const wallet = document.getElementById('walletInput').value.trim();
@@ -221,12 +436,22 @@ async function registerUser() {
     if (res.ok) {
       currentUser = name;
       tapCount = data.user?.tapCount || 0;
+      userData = data.user;
       document.getElementById('tapCount').textContent = tapCount;
       updatePlayerInfo();
       closeModal();
       showToast(`✅ Bienvenue ${name} !`);
       socket.emit('get_leaderboard');
       socket.emit('get_total_taps');
+      
+      // Si l'utilisateur n'est pas payant, proposer le paiement
+      if (!userData.isPaid) {
+        setTimeout(() => {
+          showToast('💳 Payez pour débloquer le jeu !');
+          openPayment();
+        }, 1000);
+      }
+      
       try { localStorage.setItem('miltape_user', JSON.stringify({ name, wallet })); } catch(e) {}
     } else {
       showToast('❌ ' + (data.error || 'Erreur'));
@@ -236,6 +461,7 @@ async function registerUser() {
   }
 }
 
+// --- Restore session ---
 try {
   const saved = localStorage.getItem('miltape_user');
   if (saved) {
@@ -245,7 +471,18 @@ try {
       document.getElementById('playerName').textContent = data.name;
       document.getElementById('nameInput').value = data.name;
       document.getElementById('walletInput').value = data.wallet || '';
-      updatePlayerInfo();
+      
+      // Charger les données utilisateur
+      fetch(`/api/user/${data.name}`)
+        .then(res => res.json())
+        .then(data => {
+          userData = data;
+          tapCount = data.tapCount || 0;
+          document.getElementById('tapCount').textContent = tapCount;
+          updatePlayerInfo();
+        })
+        .catch(() => {});
+      
       setTimeout(() => {
         socket.emit('get_leaderboard');
         socket.emit('get_total_taps');
@@ -254,11 +491,16 @@ try {
   }
 } catch(e) {}
 
+// --- Modal clicks ---
 document.getElementById('modal').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
+document.getElementById('paymentModal').addEventListener('click', function(e) {
+  if (e.target === this) closePaymentModal();
+});
 
-console.log('🎮 MILTAPE World Challenge');
+console.log('🎮 MILTAPE PRO - Version Payante');
+console.log('💳 Paiements TRON / Telegram');
 </script>
 </body>
 </html>
