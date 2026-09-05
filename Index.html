@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>MILTAPE</title>
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#0a0515;display:flex;justify-content:center;min-height:100vh;padding:10px}
+.container{max-width:450px;width:100%;background:linear-gradient(180deg,#1a0a2e,#0a0515);border-radius:20px;padding:20px;border:1px solid #b72cff;box-shadow:0 0 40px rgba(183,44,255,.2)}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.logo{color:#fff;font-size:24px;font-weight:900;background:linear-gradient(135deg,#b72cff,#ff6b2c);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.score{color:#ffd42e;font-weight:700;font-size:14px;background:rgba(255,255,255,.05);padding:6px 12px;border-radius:12px;border:1px solid rgba(255,212,46,.2)}
+
+.tap-zone{text-align:center;padding:30px 0}
+.tap-btn{width:200px;height:200px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#6a1b9a,#2a0a4a);border:3px solid #b72cff;box-shadow:0 0 60px rgba(183,44,255,.3);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto;transition:transform .1s;user-select:none;-webkit-tap-highlight-color:transparent}
+.tap-btn:active{transform:scale(.94)}
+.tap-btn .icon{font-size:60px;color:#fff;text-shadow:0 0 30px rgba(183,44,255,.5)}
+.tap-btn .label{color:#fff;font-size:14px;margin-top:8px;opacity:.7}
+.tap-btn .count{position:absolute;margin-top:130px;background:#08040d;border:2px solid #ffd12b;border-radius:20px;padding:4px 16px;color:#ffd42e;font-weight:900;font-size:18px}
+
+.leaderboard{background:rgba(0,0,0,.4);border-radius:12px;padding:12px;margin:20px 0;border:1px solid rgba(183,44,255,.15)}
+.leaderboard h3{color:#b78fff;font-size:12px;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px}
+.lb-item{display:flex;justify-content:space-between;padding:6px 0;color:#fff;font-size:13px;border-bottom:1px solid rgba(255,255,255,.05)}
+.lb-item .rank{color:#b78fff;font-weight:700;min-width:30px}
+.lb-item .name{flex:1;margin-left:8px}
+.lb-item .score{color:#ffd42e;font-weight:700}
+
+.player-info{display:flex;justify-content:space-between;background:rgba(0,0,0,.3);border-radius:12px;padding:10px;margin:10px 0;border:1px solid rgba(183,44,255,.1)}
+.pi-item{text-align:center;flex:1}
+.pi-item .label{color:#888;font-size:9px;text-transform:uppercase}
+.pi-item .value{color:#fff;font-weight:700;font-size:14px;margin-top:2px}
+
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;align-items:center;justify-content:center;padding:20px}
+.modal.show{display:flex}
+.modal-box{background:linear-gradient(145deg,#1a0a2e,#0a0515);border:1px solid #b72cff;border-radius:20px;padding:24px;max-width:400px;width:100%;color:#fff}
+.modal-box h2{text-align:center;margin-bottom:20px;background:linear-gradient(135deg,#b72cff,#ff6b2c);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.modal-input{width:100%;padding:12px;margin:8px 0;border-radius:10px;border:1px solid #4c3159;background:#07040c;color:#fff;font-size:14px;outline:none}
+.modal-btn{width:100%;padding:14px;margin-top:12px;border:0;border-radius:12px;background:linear-gradient(135deg,#ffd633,#ff9900);font-weight:900;font-size:16px;color:#1a0a2e;cursor:pointer}
+.modal-close{float:right;background:none;border:0;color:#fff;font-size:24px;cursor:pointer}
+
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:200;background:#1a0a2e;border:1px solid #b72cff;color:#fff;padding:12px 24px;border-radius:12px;display:none;font-weight:600}
+
+.nav{display:flex;margin-top:15px;gap:10px}
+.nav-btn{flex:1;padding:12px;border:1px solid rgba(183,44,255,.2);border-radius:12px;background:transparent;color:#888;font-size:11px;text-align:center;cursor:pointer}
+.nav-btn.active{color:#b72cff;border-color:#b72cff}
+
+.tap-particle{position:fixed;pointer-events:none;z-index:50;font-size:24px;font-weight:900;color:#ffd42e;text-shadow:0 0 20px rgba(255,212,46,.5)}
+@keyframes particleUp{to{transform:translateY(-80px);opacity:0}}
+</style>
+</head>
+<body>
+
+<div class="container" id="app">
+  <div class="header">
+    <span class="logo">✦ MILTAPE</span>
+    <span class="score" id="totalTaps">0 taps</span>
+  </div>
+
+  <div class="tap-zone">
+    <div class="tap-btn" id="tapBtn">
+      <div class="icon">⚡</div>
+      <div class="label">TAPE ICI</div>
+      <div class="count" id="tapCount">0</div>
+    </div>
+  </div>
+
+  <div class="player-info">
+    <div class="pi-item">
+      <div class="label">👤 Joueur</div>
+      <div class="value" id="playerName">—</div>
+    </div>
+    <div class="pi-item">
+      <div class="label">🏆 Rang</div>
+      <div class="value" id="playerRank">—</div>
+    </div>
+  </div>
+
+  <div class="leaderboard">
+    <h3>🏆 CLASSEMENT</h3>
+    <div id="leaderboardList"></div>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn active" onclick="openModal()">🎮 JOUER</button>
+    <button class="nav-btn" onclick="shareGame()">📤 PARTAGER</button>
+  </div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <h2>🎮 COMMENCER</h2>
+    <input class="modal-input" id="nameInput" placeholder="Ton pseudo" maxlength="15">
+    <input class="modal-input" id="walletInput" placeholder="Adresse TRON (optionnel)">
+    <button class="modal-btn" onclick="registerUser()">🚀 LANCER</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const socket = io(window.location.origin);
+let currentUser = null;
+let tapCount = 0;
+let leaderboardData = [];
+
+socket.on('connect', () => {
+  console.log('✅ Connecté');
+  socket.emit('get_leaderboard');
+  socket.emit('get_total_taps');
+});
+
+socket.on('leaderboard_update', (data) => {
+  leaderboardData = data;
+  updateLeaderboard(data);
+});
+
+socket.on('total_taps', (data) => {
+  document.getElementById('totalTaps').textContent = `${data.total || 0} taps`;
+});
+
+socket.on('tap_confirmed', (data) => {
+  if (data.name === currentUser) {
+    tapCount = data.tapCount;
+    document.getElementById('tapCount').textContent = tapCount;
+    updatePlayerInfo();
+  }
+});
+
+socket.on('error', (data) => {
+  showToast('❌ ' + (data.message || 'Erreur'));
+});
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  clearTimeout(window._t);
+  window._t = setTimeout(() => t.style.display = 'none', 2500);
+}
+
+function openModal() { document.getElementById('modal').classList.add('show'); }
+function closeModal() { document.getElementById('modal').classList.remove('show'); }
+
+function shareGame() {
+  if (navigator.share) {
+    navigator.share({ title: 'MILTAPE', text: '🎮 Rejoins MILTAPE !\n' + window.location.href });
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(window.location.href).then(() => showToast('📋 Lien copié !'));
+  } else {
+    showToast('📋 ' + window.location.href);
+  }
+}
+
+function updateLeaderboard(data) {
+  const container = document.getElementById('leaderboardList');
+  let html = '';
+  (data || []).slice(0, 10).forEach((item, i) => {
+    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`;
+    const isMe = item.name === currentUser;
+    html += `<div class="lb-item" style="${isMe ? 'background:rgba(255,212,46,.05);border-radius:4px;' : ''}">
+      <span class="rank">${medal}</span>
+      <span class="name">${item.name}</span>
+      <span class="score">${item.tapCount}</span>
+    </div>`;
+  });
+  if (!html) html = '<div style="color:#666;text-align:center;padding:12px">Aucun joueur</div>';
+  container.innerHTML = html;
+}
+
+function updatePlayerInfo() {
+  if (currentUser) {
+    document.getElementById('playerName').textContent = currentUser;
+    document.getElementById('tapCount').textContent = tapCount;
+    const idx = leaderboardData.findIndex(i => i.name === currentUser);
+    document.getElementById('playerRank').textContent = idx !== -1 ? `#${idx+1}` : '—';
+  }
+}
+
+document.getElementById('tapBtn').addEventListener('pointerdown', function(e) {
+  e.preventDefault();
+  if (!currentUser) { openModal(); return; }
+
+  this.style.transform = 'scale(.92)';
+  setTimeout(() => this.style.transform = 'scale(1)', 100);
+
+  const p = document.createElement('div');
+  p.className = 'tap-particle';
+  p.textContent = '+1';
+  const rect = this.getBoundingClientRect();
+  p.style.left = (rect.left + rect.width/2 - 15 + (Math.random()-0.5)*40) + 'px';
+  p.style.top = (rect.top + rect.height/2 - 15) + 'px';
+  p.style.animation = 'particleUp 0.6s ease-out forwards';
+  document.body.appendChild(p);
+  setTimeout(() => p.remove(), 700);
+
+  if (navigator.vibrate) navigator.vibrate(5);
+  
+  socket.emit('user_tap', { name: currentUser });
+  tapCount++;
+  document.getElementById('tapCount').textContent = tapCount;
+});
+
+async function registerUser() {
+  const name = document.getElementById('nameInput').value.trim();
+  const wallet = document.getElementById('walletInput').value.trim();
+  
+  if (!name) { showToast('📝 Entre ton pseudo !'); return; }
+  if (name.length < 2) { showToast('📝 Pseudo trop court'); return; }
+
+  try {
+    const res = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, wallet: wallet || undefined })
+    });
+    const data = await res.json();
+    
+    if (res.ok) {
+      currentUser = name;
+      tapCount = data.user?.tapCount || 0;
+      document.getElementById('tapCount').textContent = tapCount;
+      updatePlayerInfo();
+      closeModal();
+      showToast(`✅ Bienvenue ${name} !`);
+      socket.emit('get_leaderboard');
+      socket.emit('get_total_taps');
+      try { localStorage.setItem('miltape_user', JSON.stringify({ name, wallet })); } catch(e) {}
+    } else {
+      showToast('❌ ' + (data.error || 'Erreur'));
+    }
+  } catch (error) {
+    showToast('❌ Erreur de connexion');
+  }
+}
+
+try {
+  const saved = localStorage.getItem('miltape_user');
+  if (saved) {
+    const data = JSON.parse(saved);
+    if (data.name) {
+      currentUser = data.name;
+      document.getElementById('playerName').textContent = data.name;
+      document.getElementById('nameInput').value = data.name;
+      document.getElementById('walletInput').value = data.wallet || '';
+      updatePlayerInfo();
+      setTimeout(() => {
+        socket.emit('get_leaderboard');
+        socket.emit('get_total_taps');
+      }, 500);
+    }
+  }
+} catch(e) {}
+
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+console.log('🎮 MILTAPE World Challenge');
+</script>
+</body>
+</html>
