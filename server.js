@@ -4,21 +4,13 @@ const { Server } = require('socket.io');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
-const dotenv = require('dotenv');
-
-// Charger les variables d'environnement
-dotenv.config();
-
-// Importer les routes et modèles
-const apiRoutes = require('./routes/api');
-const User = require('./models/User');
 
 // --- Initialisation ---
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "*",
+    origin: "*",
     methods: ["GET", "POST"]
   }
 });
@@ -28,212 +20,250 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 app.use(cors({
-  origin: process.env.CLIENT_URL || "*",
+  origin: "*",
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // --- Connexion à MongoDB ---
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/miltape';
+// Option 1: MongoDB Atlas (gratuit, en ligne)
+const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://votre_user:votre_password@cluster0.xxxxx.mongodb.net/miltape?retryWrites=true&w=majority';
+// Option 2: MongoDB local (si vous avez installé MongoDB sur votre téléphone/serveur)
+// const MONGO_URI = 'mongodb://localhost:27017/miltape';
 
 mongoose.connect(MONGO_URI, {
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000,
 })
-.then(() => console.log('✅ Connecté à MongoDB avec succès'))
+.then(() => console.log('✅ Connecté à MongoDB'))
 .catch(err => {
-  console.error('❌ Erreur de connexion à MongoDB :', err.message);
-  process.exit(1);
-});
-
-// Gestion des erreurs MongoDB après connexion
-mongoose.connection.on('error', err => {
   console.error('❌ Erreur MongoDB:', err.message);
+  console.log('⚠️ Le serveur démarre en mode dégradé (sans base de données)');
 });
 
-mongoose.connection.on('disconnected', () => {
-  console.log('⚠️ Déconnecté de MongoDB');
-});
+// --- Modèle User (si MongoDB n'est pas disponible, on utilise une mémoire temporaire) ---
+let users = [];
+let totalTaps = 0;
+
+// Schéma MongoDB si disponible
+let User = null;
+try {
+  const userSchema = new mongoose.Schema({
+    name: { type: String, required: true, unique: true, trim: true },
+    walletAddress: { type: String, default: null },
+    tapCount: { type: Number, default: 0 },
+    paymentMethod: { type: String, enum: ['tron', 'telegram'], default: 'tron' },
+    lastUpdated: { type: Date, default: Date.now },
+    createdAt: { type: Date, default: Date.now },
+  });
+  User = mongoose.model('User', userSchema);
+} catch (error) {
+  console.log('📝 Mode mémoire activé (sans base de données)');
+}
+
+// --- Fonctions de gestion des utilisateurs (mémoire) ---
+async function findUser(name) {
+  if (User) {
+    return await User.findOne({ name });
+  }
+  return users.find(u => u.name === name);
+}
+
+async function createOrUpdateUser(name, walletAddress, paymentMethod) {
+  if (User) {
+    const user = await User.findOneAndUpdate(
+      { name },
+      { walletAddress, paymentMethod },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
+    return user;
+  }
+  
+  let user = users.find(u => u.name === name);
+  if (!user) {
+    user = { name, walletAddress, paymentMethod, tapCount: 0, createdAt: new Date() };
+    users.push(user);
+  } else {
+    user.walletAddress = walletAddress || user.walletAddress;
+    user.paymentMethod = paymentMethod || user.paymentMethod;
+  }
+  return user;
+}
+
+async function incrementTap(name) {
+  if (User) {
+    const user = await User.findOneAndUpdate(
+      { name },
+      { $inc: { tapCount: 1 }, $set: { lastUpdated: new Date() } },
+      { new: true, upsert: true }
+    );
+    return user;
+  }
+  
+  let user = users.find(u => u.name === name);
+  if (!user) {
+    user = { name, tapCount: 1, createdAt: new Date() };
+    users.push(user);
+  } else {
+    user.tapCount += 1;
+    user.lastUpdated = new Date();
+  }
+  totalTaps += 1;
+  return user;
+}
+
+async function getLeaderboard(limit = 10) {
+  if (User) {
+    return await User.find()
+      .sort({ tapCount: -1 })
+      .limit(limit)
+      .select('name tapCount -_id');
+  }
+  return users
+    .sort((a, b) => b.tapCount - a.tapCount)
+    .slice(0, limit)
+    .map(u => ({ name: u.name, tapCount: u.tapCount }));
+}
+
+async function getTotalTaps() {
+  if (User) {
+    const result = await User.aggregate([
+      { $group: { _id: null, total: { $sum: '$tapCount' } } }
+    ]);
+    return result.length > 0 ? result[0].total : 0;
+  }
+  return totalTaps;
+}
+
+async function getUserRank(name) {
+  if (User) {
+    const user = await User.findOne({ name });
+    if (!user) return null;
+    const count = await User.countDocuments({ tapCount: { $gt: user.tapCount } });
+    return count + 1;
+  }
+  const sorted = [...users].sort((a, b) => b.tapCount - a.tapCount);
+  const rank = sorted.findIndex(u => u.name === name);
+  return rank !== -1 ? rank + 1 : null;
+}
 
 // --- Routes API ---
-app.use('/api', apiRoutes);
-
-// --- Route de base ---
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
-    message: 'Serveur Miltape en ligne'
+    database: User ? 'MongoDB' : 'Memory'
   });
 });
 
-// --- Route 404 ---
-app.use((req, res) => {
-  res.status(404).json({ error: 'Route non trouvée' });
+app.post('/api/users/register', async (req, res) => {
+  const { name, walletAddress, paymentMethod } = req.body;
+  
+  if (!name) {
+    return res.status(400).json({ error: 'Le nom est requis' });
+  }
+  
+  try {
+    const user = await createOrUpdateUser(name, walletAddress, paymentMethod);
+    res.status(201).json({
+      message: 'Utilisateur enregistré',
+      user: {
+        name: user.name,
+        walletAddress: user.walletAddress,
+        paymentMethod: user.paymentMethod,
+        tapCount: user.tapCount,
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
 });
 
-// --- Gestion des erreurs globales ---
-app.use((err, req, res, next) => {
-  console.error('❌ Erreur serveur:', err.stack);
-  res.status(500).json({ 
-    error: 'Erreur interne du serveur',
-    message: process.env.NODE_ENV === 'development' ? err.message : undefined
-  });
+app.get('/api/leaderboard', async (req, res) => {
+  try {
+    const leaderboard = await getLeaderboard();
+    res.json({ success: true, data: leaderboard });
+  } catch (error) {
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
 });
 
-// --- Gestion des connexions Socket.io ---
-const connectedUsers = new Map(); // Pour suivre les utilisateurs connectés
+app.get('/api/total-taps', async (req, res) => {
+  try {
+    const total = await getTotalTaps();
+    res.json({ success: true, total });
+  } catch (error) {
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
 
+// --- Socket.io ---
 io.on('connection', (socket) => {
-  console.log('👤 Nouvelle connexion Socket.io:', socket.id);
+  console.log('👤 Nouvelle connexion:', socket.id);
 
-  // Événement pour récupérer le classement
   socket.on('get_leaderboard', async () => {
     try {
-      const leaderboard = await User.find()
-        .sort({ tapCount: -1 })
-        .limit(10)
-        .select('name tapCount -_id');
+      const leaderboard = await getLeaderboard();
       socket.emit('leaderboard_update', leaderboard);
     } catch (error) {
-      console.error("Erreur lors de la récupération du classement:", error);
-      socket.emit('error', { 
-        message: 'Impossible de récupérer le classement',
-        code: 'LEADERBOARD_ERROR'
-      });
+      socket.emit('error', { message: 'Erreur classement' });
     }
   });
 
-  // Événement lorsqu'un joueur enregistre un nouveau tap
-  socket.on('user_tap', async (data) => {
-    if (!data || !data.name) {
-      socket.emit('error', { 
-        message: 'Données invalides pour user_tap',
-        code: 'INVALID_DATA'
-      });
-      return;
-    }
-
-    try {
-      // Mettre à jour le score de l'utilisateur
-      const updatedUser = await User.findOneAndUpdate(
-        { name: data.name },
-        { 
-          $inc: { tapCount: 1 },
-          $set: { lastUpdated: new Date() }
-        },
-        { 
-          new: true,
-          upsert: true,
-          setDefaultsOnInsert: true
-        }
-      );
-
-      console.log(`⬆️ Tap pour ${updatedUser.name}, nouveau score: ${updatedUser.tapCount}`);
-
-      // Récupérer le nouveau classement
-      const newLeaderboard = await User.find()
-        .sort({ tapCount: -1 })
-        .limit(10)
-        .select('name tapCount -_id');
-
-      // Diffuser le nouveau classement à TOUS les clients
-      io.emit('leaderboard_update', newLeaderboard);
-
-      // Optionnel: envoyer une confirmation au joueur
-      socket.emit('tap_confirmed', {
-        name: updatedUser.name,
-        tapCount: updatedUser.tapCount
-      });
-
-    } catch (error) {
-      console.error("Erreur lors du traitement du tap:", error);
-      socket.emit('error', { 
-        message: 'Erreur serveur lors du tap',
-        code: 'TAP_PROCESSING_ERROR'
-      });
-    }
-  });
-
-  // Événement pour récupérer le score d'un utilisateur spécifique
-  socket.on('get_user_score', async (data) => {
-    if (!data || !data.name) {
-      socket.emit('error', { 
-        message: 'Nom d\'utilisateur requis',
-        code: 'MISSING_NAME'
-      });
-      return;
-    }
-
-    try {
-      const user = await User.findOne({ name: data.name });
-      if (user) {
-        socket.emit('user_score', {
-          name: user.name,
-          tapCount: user.tapCount,
-          rank: await User.countDocuments({ tapCount: { $gt: user.tapCount } }) + 1
-        });
-      } else {
-        socket.emit('user_score', null);
-      }
-    } catch (error) {
-      console.error("Erreur lors de la récupération du score:", error);
-      socket.emit('error', { 
-        message: 'Erreur lors de la récupération du score',
-        code: 'SCORE_FETCH_ERROR'
-      });
-    }
-  });
-
-  // Événement pour obtenir le nombre total de taps
   socket.on('get_total_taps', async () => {
     try {
-      const result = await User.aggregate([
-        { $group: { _id: null, total: { $sum: '$tapCount' } } }
-      ]);
-      const total = result.length > 0 ? result[0].total : 0;
+      const total = await getTotalTaps();
       socket.emit('total_taps', { total });
     } catch (error) {
-      console.error("Erreur lors du calcul des taps totaux:", error);
-      socket.emit('error', { 
-        message: 'Erreur lors du calcul des taps totaux',
-        code: 'TOTAL_TAPS_ERROR'
-      });
+      socket.emit('error', { message: 'Erreur total taps' });
     }
   });
 
-  // Quand un utilisateur se déconnecte
+  socket.on('user_tap', async (data) => {
+    if (!data || !data.name) {
+      socket.emit('error', { message: 'Données invalides' });
+      return;
+    }
+
+    try {
+      const user = await incrementTap(data.name);
+      const leaderboard = await getLeaderboard();
+      const total = await getTotalTaps();
+      
+      io.emit('leaderboard_update', leaderboard);
+      io.emit('total_taps', { total });
+      
+      socket.emit('tap_confirmed', {
+        name: user.name,
+        tapCount: user.tapCount
+      });
+    } catch (error) {
+      socket.emit('error', { message: 'Erreur tap' });
+    }
+  });
+
   socket.on('disconnect', () => {
-    console.log('👋 Déconnexion Socket.io:', socket.id);
+    console.log('👋 Déconnexion:', socket.id);
   });
 });
 
 // --- Démarrage du serveur ---
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`🚀 Serveur en écoute sur le port ${PORT}`);
-  console.log(`📡 Environnement: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔗 Client autorisé: ${process.env.CLIENT_URL || '*'}`);
-});
+const PORT = process.env.PORT || 3000;
+const HOST = '0.0.0.0'; // Important pour le réseau local
 
-// --- Gestion de l'arrêt propre ---
-process.on('SIGINT', () => {
-  console.log('🛑 Arrêt du serveur...');
-  server.close(() => {
-    mongoose.connection.close(false, () => {
-      console.log('👋 Serveur arrêté proprement');
-      process.exit(0);
-    });
-  });
-});
-
-process.on('SIGTERM', () => {
-  console.log('🛑 Arrêt du serveur...');
-  server.close(() => {
-    mongoose.connection.close(false, () => {
-      console.log('👋 Serveur arrêté proprement');
-      process.exit(0);
-    });
-  });
+server.listen(PORT, HOST, () => {
+  console.log(`🚀 Serveur démarré sur http://${HOST}:${PORT}`);
+  console.log(`📱 Connexion depuis votre téléphone: http://VOTRE_IP:${PORT}`);
+  
+  // Afficher l'IP locale pour le téléphone
+  const os = require('os');
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        console.log(`📱 IP locale: http://${iface.address}:${PORT}`);
+      }
+    }
+  }
 });
