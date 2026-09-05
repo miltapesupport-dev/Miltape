@@ -21,108 +21,119 @@ body{display:flex;justify-content:center}
 .background{position:absolute;inset:0;background:linear-gradient(180deg,#0a0515 0%,#1a0a2e 50%,#0d0520 100%);z-index:0}
 .glow{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 30%,rgba(183,44,255,.08) 0%,transparent 70%);z-index:1}
 
-/* --- EN-TÊTE --- */
-.header{position:absolute;top:0;left:0;right:0;padding:10px 12px;z-index:10;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,.4);backdrop-filter:blur(10px)}
-.header-left{display:flex;align-items:center;gap:8px}
-.logo{color:#fff;font-weight:900;font-size:16px;background:linear-gradient(135deg,#b72cff,#ff6b2c);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.header-center{display:flex;align-items:center;gap:8px}
-.timer{color:#ffd42e;font-weight:900;font-size:14px;background:rgba(0,0,0,.5);padding:4px 12px;border-radius:8px;border:1px solid rgba(255,212,46,.2)}
-.players{color:#888;font-size:11px}
-.header-right{display:flex;align-items:center;gap:6px}
-.wallet-btn{color:#ffd42e;font-weight:700;font-size:12px;background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.2);border-radius:8px;padding:4px 10px;cursor:pointer}
+/* HEADER */
+.header{position:absolute;top:0;left:0;right:0;padding:8px 10px;z-index:10;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,.5);backdrop-filter:blur(10px)}
+.logo{color:#fff;font-weight:900;font-size:14px;background:linear-gradient(135deg,#b72cff,#ff6b2c);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header-center{display:flex;align-items:center;gap:6px}
+.timer{color:#ffd42e;font-weight:900;font-size:13px;background:rgba(0,0,0,.5);padding:2px 10px;border-radius:6px;border:1px solid rgba(255,212,46,.2)}
+.players{color:#888;font-size:10px}
+.wallet-btn{color:#ffd42e;font-weight:700;font-size:11px;background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.2);border-radius:6px;padding:2px 8px;cursor:pointer}
 
-/* --- ZONE DE TAP --- */
-.tap-zone{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5;text-align:center}
-.tap-circle{width:180px;height:180px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#6a1b9a,#2a0a4a);border:3px solid #b72cff;box-shadow:0 0 60px rgba(183,44,255,.3),inset 0 0 60px rgba(183,44,255,.1);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto;transition:transform .1s;user-select:none;position:relative;touch-action:manipulation}
+/* SLOGAN */
+.slogan{position:absolute;top:50px;left:0;right:0;z-index:5;text-align:center}
+.slogan span{color:#b78fff;font-weight:900;font-size:11px;letter-spacing:1.5px;text-shadow:0 0 20px rgba(183,44,255,.3)}
+
+/* TAP ZONE */
+.tap-zone{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5;text-align:center;margin-top:-10px}
+.tap-circle{width:160px;height:160px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#6a1b9a,#2a0a4a);border:3px solid #b72cff;box-shadow:0 0 60px rgba(183,44,255,.3),inset 0 0 60px rgba(183,44,255,.1);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto;transition:transform .1s;user-select:none;position:relative;touch-action:manipulation}
 .tap-circle:active{transform:scale(.94)}
-.tap-circle .icon{font-size:50px;color:#fff;text-shadow:0 0 30px rgba(183,44,255,.5)}
-.tap-circle .label{color:#fff;font-size:12px;margin-top:4px;opacity:.7}
-.tap-circle .count{position:absolute;bottom:-18px;background:#08040d;border:2px solid #ffd12b;border-radius:20px;padding:3px 14px;color:#ffd42e;font-weight:900;font-size:16px;white-space:nowrap}
+.tap-circle .icon{font-size:40px;color:#fff;text-shadow:0 0 30px rgba(183,44,255,.5)}
+.tap-circle .label{color:#fff;font-size:11px;margin-top:3px;opacity:.7}
+.tap-circle .count{position:absolute;bottom:-16px;background:#08040d;border:2px solid #ffd12b;border-radius:20px;padding:2px 12px;color:#ffd42e;font-weight:900;font-size:14px}
 .tap-circle.locked{opacity:.5;cursor:not-allowed}
 .tap-circle.locked:active{transform:none}
-.tap-circle .lock-icon{position:absolute;top:-8px;right:-8px;font-size:20px}
+.tap-circle .lock-icon{position:absolute;top:-6px;right:-6px;font-size:16px}
 
-/* --- MISES --- */
-.bets{position:absolute;bottom:100px;left:0;right:0;z-index:5;display:flex;justify-content:center;gap:6px;padding:0 10px}
-.bet-btn{flex:1;max-width:70px;padding:6px 0;border-radius:8px;border:2px solid rgba(183,44,255,.2);background:rgba(0,0,0,.5);color:#888;font-size:10px;font-weight:700;text-align:center;cursor:pointer;transition:all .2s}
-.bet-btn .amount{font-size:14px;color:#fff;display:block}
-.bet-btn .label{font-size:8px;color:#666}
-.bet-btn.active{border-color:#ffd12b;background:rgba(255,209,43,.1);color:#ffd42e}
+/* BANNIÈRE GAGNANTE */
+.winner-banner{position:absolute;bottom:225px;left:0;right:0;z-index:5;padding:0 12px}
+.winner-banner .box{background:linear-gradient(135deg,rgba(183,44,255,.12),rgba(255,107,44,.12));border:1px solid rgba(183,44,255,.2);border-radius:10px;padding:6px 10px}
+.winner-banner .row{display:flex;justify-content:center;gap:10px;align-items:center}
+.winner-banner .row .icon{color:#ffd42e;font-weight:900;font-size:10px}
+.winner-banner .row .mult{color:#ffd42e;font-weight:900;font-size:13px}
+.winner-banner .row .time{color:#888;font-size:8px}
+.winner-banner .desc{color:#666;font-size:7px;text-align:center;margin-top:2px}
+
+/* MISES */
+.bets{position:absolute;bottom:160px;left:0;right:0;z-index:5;display:flex;justify-content:center;gap:4px;padding:0 8px}
+.bet-btn{flex:1;max-width:65px;padding:4px 0;border-radius:6px;border:2px solid rgba(183,44,255,.15);background:rgba(0,0,0,.4);color:#666;font-size:8px;font-weight:700;text-align:center;cursor:pointer;transition:all .2s}
+.bet-btn .amount{font-size:12px;color:#fff;display:block}
+.bet-btn .label{font-size:7px;color:#555}
+.bet-btn.active{border-color:#ffd12b;background:rgba(255,209,43,.08);color:#ffd42e}
 .bet-btn.active .amount{color:#ffd42e}
 
-/* --- INFOS --- */
-.info-bar{position:absolute;bottom:160px;left:0;right:0;z-index:5;padding:0 12px;display:flex;gap:6px}
-.info-item{flex:1;background:rgba(0,0,0,.5);border:1px solid rgba(183,44,255,.1);border-radius:8px;padding:4px 6px;text-align:center}
-.info-item .label{color:#666;font-size:7px;text-transform:uppercase;letter-spacing:1px}
-.info-item .value{color:#fff;font-weight:700;font-size:11px}
+/* INFOS */
+.info-bar{position:absolute;bottom:190px;left:0;right:0;z-index:5;padding:0 10px;display:flex;gap:4px}
+.info-item{flex:1;background:rgba(0,0,0,.4);border:1px solid rgba(183,44,255,.08);border-radius:6px;padding:3px 4px;text-align:center}
+.info-item .label{color:#555;font-size:6px;text-transform:uppercase;letter-spacing:0.5px}
+.info-item .value{color:#fff;font-weight:700;font-size:10px}
 
-/* --- CHAT --- */
-.chat{position:absolute;bottom:130px;left:10px;right:10px;z-index:4;background:rgba(0,0,0,.6);border-radius:10px;border:1px solid rgba(183,44,255,.1);padding:6px 10px;max-height:60px;overflow-y:auto}
+/* CHAT */
+.chat{position:absolute;bottom:120px;left:8px;right:8px;z-index:4;background:rgba(0,0,0,.5);border-radius:8px;border:1px solid rgba(183,44,255,.08);padding:4px 8px;max-height:45px;overflow-y:auto}
 .chat::-webkit-scrollbar{width:2px}
 .chat::-webkit-scrollbar-thumb{background:#b72cff;border-radius:2px}
-.chat-msg{color:#fff;font-size:10px;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.chat-msg{color:#fff;font-size:9px;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.03)}
 .chat-msg .user{color:#b78fff;font-weight:700}
-.chat-msg .time{color:#666;font-size:8px;margin-left:6px}
-
-.chat-input{position:absolute;bottom:80px;left:10px;right:60px;z-index:5;padding:6px 10px;border-radius:8px;border:1px solid rgba(183,44,255,.2);background:rgba(0,0,0,.6);color:#fff;font-size:11px;outline:none}
+.chat-msg .time{color:#444;font-size:7px;margin-left:4px}
+.chat-input{position:absolute;bottom:70px;left:8px;right:50px;z-index:5;padding:4px 8px;border-radius:6px;border:1px solid rgba(183,44,255,.15);background:rgba(0,0,0,.5);color:#fff;font-size:10px;outline:none}
 .chat-input:focus{border-color:#b72cff}
-.chat-send{position:absolute;bottom:80px;right:10px;z-index:5;padding:6px 14px;border-radius:8px;border:0;background:linear-gradient(135deg,#b72cff,#6a1b9a);color:#fff;font-weight:700;font-size:11px;cursor:pointer}
+.chat-send{position:absolute;bottom:70px;right:8px;z-index:5;padding:4px 10px;border-radius:6px;border:0;background:linear-gradient(135deg,#b72cff,#6a1b9a);color:#fff;font-weight:700;font-size:10px;cursor:pointer}
 
-/* --- LEADERBOARD --- */
-.leaderboard{position:absolute;top:60px;right:6px;z-index:8;background:rgba(0,0,0,.6);backdrop-filter:blur(10px);border:1px solid rgba(183,44,255,.15);border-radius:8px;padding:6px 8px;min-width:80px;max-height:140px;overflow-y:auto}
+/* LEADERBOARD */
+.leaderboard{position:absolute;top:52px;right:4px;z-index:8;background:rgba(0,0,0,.5);backdrop-filter:blur(10px);border:1px solid rgba(183,44,255,.1);border-radius:6px;padding:4px 6px;min-width:70px;max-height:120px;overflow-y:auto}
 .leaderboard::-webkit-scrollbar{width:2px}
 .leaderboard::-webkit-scrollbar-thumb{background:#b72cff;border-radius:2px}
-.lb-item{display:flex;justify-content:space-between;padding:2px 0;color:#fff;font-size:9px;border-bottom:1px solid rgba(255,255,255,.05)}
-.lb-item .rank{color:#b78fff;font-weight:700;min-width:20px}
-.lb-item .name{flex:1;margin-left:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60px}
+.lb-item{display:flex;justify-content:space-between;padding:1px 0;color:#fff;font-size:8px;border-bottom:1px solid rgba(255,255,255,.03)}
+.lb-item .rank{color:#b78fff;font-weight:700;min-width:16px}
+.lb-item .name{flex:1;margin-left:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:50px}
 .lb-item .score{color:#ffd42e;font-weight:700}
 
-/* --- NAVIGATION --- */
-.nav{position:absolute;bottom:0;left:0;right:0;z-index:10;display:flex;background:rgba(0,0,0,.8);backdrop-filter:blur(10px);border-top:1px solid rgba(183,44,255,.15)}
-.nav-btn{flex:1;padding:8px 0;background:none;border:0;color:#666;font-size:8px;text-align:center;cursor:pointer}
-.nav-btn .icon{font-size:18px;display:block;margin-bottom:2px}
+/* NAV */
+.nav{position:absolute;bottom:0;left:0;right:0;z-index:10;display:flex;background:rgba(0,0,0,.7);backdrop-filter:blur(10px);border-top:1px solid rgba(183,44,255,.1)}
+.nav-btn{flex:1;padding:6px 0;background:none;border:0;color:#555;font-size:7px;text-align:center;cursor:pointer}
+.nav-btn .icon{font-size:16px;display:block;margin-bottom:1px}
 .nav-btn.active{color:#b72cff}
 
-/* --- MODAL --- */
+/* MODAL */
 .modal{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.85);align-items:center;justify-content:center;padding:16px}
 .modal.show{display:flex}
-.modal-box{width:min(380px,95vw);background:linear-gradient(145deg,#1a0a2e,#0a0515);border:1px solid #b72cff;border-radius:16px;padding:20px;color:#fff;max-height:90vh;overflow-y:auto}
-.modal-box h2{text-align:center;margin:0 0 14px;font-size:18px;background:linear-gradient(135deg,#b72cff,#ff6b2c);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.modal-close{float:right;background:none;border:0;color:#fff;font-size:24px;cursor:pointer}
-.modal-field{display:block;width:100%;padding:10px;margin:6px 0;border-radius:8px;border:1px solid #4c3159;background:#07040c;color:#fff;font-size:13px;outline:none}
+.modal-box{width:min(380px,95vw);background:linear-gradient(145deg,#1a0a2e,#0a0515);border:1px solid #b72cff;border-radius:14px;padding:16px;color:#fff;max-height:90vh;overflow-y:auto}
+.modal-box h2{text-align:center;margin:0 0 12px;font-size:16px;background:linear-gradient(135deg,#b72cff,#ff6b2c);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.modal-close{float:right;background:none;border:0;color:#fff;font-size:22px;cursor:pointer}
+.modal-field{display:block;width:100%;padding:8px;margin:4px 0;border-radius:6px;border:1px solid #4c3159;background:#07040c;color:#fff;font-size:12px;outline:none}
 .modal-field:focus{border-color:#b72cff}
-.modal-btn{width:100%;padding:12px;margin-top:10px;border:0;border-radius:10px;background:linear-gradient(135deg,#ffd633,#ff9900);font-weight:900;font-size:15px;color:#1a0a2e;cursor:pointer}
+.modal-btn{width:100%;padding:10px;margin-top:8px;border:0;border-radius:8px;background:linear-gradient(135deg,#ffd633,#ff9900);font-weight:900;font-size:14px;color:#1a0a2e;cursor:pointer}
+.modal-info{text-align:center;margin-top:8px;font-size:9px;color:#555}
 
-/* --- TOAST --- */
-.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);z-index:200;background:#1a0a2e;border:1px solid #b72cff;color:#fff;padding:10px 18px;border-radius:10px;display:none;font-weight:600;font-size:12px;text-align:center;max-width:90%}
+/* TOAST */
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);z-index:200;background:#1a0a2e;border:1px solid #b72cff;color:#fff;padding:8px 16px;border-radius:8px;display:none;font-weight:600;font-size:11px;text-align:center;max-width:90%}
 
-/* --- PARTICLES --- */
-.tap-particle{position:fixed;pointer-events:none;z-index:50;font-size:20px;font-weight:900;color:#ffd42e;text-shadow:0 0 20px rgba(255,212,46,.5)}
-@keyframes particleUp{to{transform:translateY(-70px);opacity:0}}
+/* PARTICLES */
+.tap-particle{position:fixed;pointer-events:none;z-index:50;font-size:18px;font-weight:900;color:#ffd42e;text-shadow:0 0 20px rgba(255,212,46,.5)}
+@keyframes particleUp{to{transform:translateY(-60px);opacity:0}}
 
-/* --- RESPONSIVE --- */
+/* RESPONSIVE */
 @media(max-width:430px){
-  .tap-circle{width:150px;height:150px}
-  .tap-circle .icon{font-size:40px}
-  .tap-circle .count{font-size:14px;padding:2px 10px}
-  .bet-btn{max-width:60px}
-  .bet-btn .amount{font-size:12px}
-  .chat{max-height:50px}
+  .tap-circle{width:140px;height:140px}
+  .tap-circle .icon{font-size:34px}
+  .tap-circle .count{font-size:12px;padding:2px 8px}
+  .bet-btn{max-width:55px}
+  .bet-btn .amount{font-size:11px}
+  .chat{max-height:40px}
+  .winner-banner .box{padding:4px 8px}
 }
-
 @media(max-height:700px){
-  .tap-circle{width:130px;height:130px}
-  .tap-circle .icon{font-size:35px}
-  .info-bar{bottom:140px}
-  .bets{bottom:85px}
-  .chat{bottom:115px}
-  .chat-input{bottom:65px}
-  .chat-send{bottom:65px}
+  .tap-circle{width:120px;height:120px}
+  .tap-circle .icon{font-size:28px}
+  .slogan{top:44px}
+  .slogan span{font-size:9px}
+  .info-bar{bottom:172px}
+  .bets{bottom:142px}
+  .winner-banner{bottom:200px}
+  .chat{bottom:105px}
+  .chat-input{bottom:60px}
+  .chat-send{bottom:60px}
+  .leaderboard{top:46px;max-height:90px}
 }
-
-::-webkit-scrollbar{width:3px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:#b72cff;border-radius:2px}
 </style>
 </head>
 <body>
@@ -132,21 +143,20 @@ body{display:flex;justify-content:center}
 
   <!-- HEADER -->
   <div class="header">
-    <div class="header-left">
-      <span class="logo">✦ MILTAPE</span>
-    </div>
+    <span class="logo">✦ MILTAPE</span>
     <div class="header-center">
       <span class="timer" id="timer">10:00</span>
-      <span class="players" id="onlinePlayers">👤 0</span>
+      <span class="players" id="onlinePlayers">👤 <span id="playerCount">0</span></span>
     </div>
-    <div class="header-right">
-      <span class="wallet-btn" id="walletDisplay" onclick="openModal()">💰 0.00€</span>
-    </div>
+    <span class="wallet-btn" onclick="openModal()">💰 <span id="walletDisplay">0.00</span>€</span>
   </div>
+
+  <!-- SLOGAN -->
+  <div class="slogan"><span>⚡ TAPE. CLASSE-TOI. GAGNE. ⚡</span></div>
 
   <!-- LEADERBOARD -->
   <div class="leaderboard" id="leaderboard">
-    <div class="lb-item" style="color:#666;font-size:8px;border-bottom-color:#333">
+    <div class="lb-item" style="color:#444;font-size:7px;border-bottom-color:#222">
       <span>#</span><span>JOUEUR</span><span>TAPS</span>
     </div>
   </div>
@@ -177,6 +187,19 @@ body{display:flex;justify-content:center}
     </div>
   </div>
 
+  <!-- BANNIÈRE GAGNANTE -->
+  <div class="winner-banner">
+    <div class="box">
+      <div class="row">
+        <span class="icon">🏆 TOP 5</span>
+        <span style="color:#555;font-size:9px">×</span>
+        <span class="mult">2X TA MISE</span>
+        <span class="time">⏱ 10 MIN</span>
+      </div>
+      <div class="desc">Sois dans le Top 5 et gagne 2x ta mise !</div>
+    </div>
+  </div>
+
   <!-- MISES -->
   <div class="bets" id="bets">
     <div class="bet-btn active" data-bet="1" onclick="selectBet(this)">
@@ -189,7 +212,7 @@ body{display:flex;justify-content:center}
     </div>
     <div class="bet-btn" data-bet="10" onclick="selectBet(this)">
       <span class="amount">10€</span>
-      <span class="label">PRO</span>
+      <span class="label">PREMIUM</span>
     </div>
     <div class="bet-btn" data-bet="20" onclick="selectBet(this)">
       <span class="amount">20€</span>
@@ -199,24 +222,21 @@ body{display:flex;justify-content:center}
 
   <!-- CHAT -->
   <div class="chat" id="chatMessages">
-    <div class="chat-msg" style="color:#666;text-align:center;font-size:9px">Bienvenue sur MILTAPE !</div>
+    <div class="chat-msg" style="color:#444;text-align:center;font-size:8px">🔥 1,254 en ligne • Bienvenue sur MILTAPE !</div>
   </div>
   <input class="chat-input" id="chatInput" placeholder="Message..." maxlength="60">
   <button class="chat-send" onclick="sendChat()">➤</button>
 
-  <!-- NAVIGATION -->
+  <!-- NAV -->
   <div class="nav">
     <button class="nav-btn" onclick="scrollToTop()">
-      <span class="icon">🏠</span>
-      ACCUEIL
+      <span class="icon">🏠</span> ACCUEIL
     </button>
     <button class="nav-btn active" onclick="openModal()">
-      <span class="icon">🎮</span>
-      JOUER
+      <span class="icon">🎮</span> JOUER
     </button>
     <button class="nav-btn" onclick="shareGame()">
-      <span class="icon">📤</span>
-      PARTAGER
+      <span class="icon">📤</span> PARTAGER
     </button>
   </div>
 </div>
@@ -225,17 +245,14 @@ body{display:flex;justify-content:center}
 <div class="modal" id="modal">
   <div class="modal-box">
     <button class="modal-close" onclick="closeModal()">×</button>
-    <h2>🎮 MILTAPE WORLD CHALLENGE</h2>
+    <h2>🎮 WORLD CHALLENGE</h2>
     <input class="modal-field" id="nameInput" placeholder="Ton pseudo" maxlength="15">
     <input class="modal-field" id="walletInput" placeholder="Adresse TRON (optionnel)">
     <button class="modal-btn" onclick="registerUser()">🚀 LANCER LE JEU</button>
-    <div style="text-align:center;margin-top:10px;font-size:10px;color:#666">
-      1 partie = 10 minutes • Top 5 gagnent 2x leur mise
-    </div>
+    <div class="modal-info">🏆 Top 5 = 2x mise • ⏱ 10 min par partie</div>
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
@@ -260,7 +277,7 @@ socket.on('leaderboard_update', (data) => {
 });
 
 socket.on('total_taps', (data) => {
-  document.getElementById('onlinePlayers').textContent = `👤 ${data.total || 0}`;
+  document.getElementById('playerCount').textContent = (data.total || 0).toLocaleString();
 });
 
 socket.on('tap_confirmed', (data) => {
@@ -281,12 +298,11 @@ function showToast(msg) {
   t.textContent = msg;
   t.style.display = 'block';
   clearTimeout(window._t);
-  window._t = setTimeout(() => t.style.display = 'none', 3000);
+  window._t = setTimeout(() => t.style.display = 'none', 2500);
 }
 
 function openModal() { document.getElementById('modal').classList.add('show'); }
 function closeModal() { document.getElementById('modal').classList.remove('show'); }
-
 function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
 function shareGame() {
@@ -305,7 +321,6 @@ function selectBet(el) {
   el.classList.add('active');
   selectedBet = parseInt(el.dataset.bet);
   document.getElementById('betDisplay').textContent = `${selectedBet}€`;
-  showToast(`💰 Mise ${selectedBet}€`);
 }
 
 // --- Timer ---
@@ -337,7 +352,7 @@ function updateTimerDisplay() {
 // --- Leaderboard ---
 function updateLeaderboard(data) {
   const container = document.getElementById('leaderboard');
-  let html = `<div class="lb-item" style="color:#666;font-size:8px;border-bottom-color:#333">
+  let html = `<div class="lb-item" style="color:#444;font-size:7px;border-bottom-color:#222">
     <span>#</span><span>JOUEUR</span><span>TAPS</span>
   </div>`;
   
@@ -351,7 +366,7 @@ function updateLeaderboard(data) {
     </div>`;
   });
   if (!data || data.length === 0) {
-    html += `<div class="lb-item" style="color:#666;justify-content:center;padding:4px 0">Aucun joueur</div>`;
+    html += `<div class="lb-item" style="color:#444;justify-content:center;padding:4px 0">Aucun joueur</div>`;
   }
   container.innerHTML = html;
 }
@@ -361,9 +376,14 @@ function updatePlayerInfo() {
   if (currentUser) {
     document.getElementById('playerName').textContent = currentUser;
     document.getElementById('tapCount').textContent = tapCount;
-    document.getElementById('walletDisplay').textContent = `💰 ${(tapCount * selectedBet / 100).toFixed(2)}€`;
+    document.getElementById('walletDisplay').textContent = (tapCount * selectedBet / 100).toFixed(2);
+    
+    const idx = leaderboardData.findIndex(i => i.name === currentUser);
+    document.getElementById('playerRank').textContent = idx !== -1 ? `#${idx+1}` : '—';
   }
 }
+
+let leaderboardData = [];
 
 // --- Chat ---
 function sendChat() {
@@ -401,7 +421,6 @@ document.getElementById('tapCircle').addEventListener('pointerdown', function(e)
   this.style.transform = 'scale(.92)';
   setTimeout(() => this.style.transform = 'scale(1)', 100);
 
-  // Particle
   const p = document.createElement('div');
   p.className = 'tap-particle';
   p.textContent = '+1';
@@ -417,7 +436,7 @@ document.getElementById('tapCircle').addEventListener('pointerdown', function(e)
   socket.emit('user_tap', { name: currentUser });
   tapCount++;
   document.getElementById('tapCount').textContent = tapCount;
-  document.getElementById('walletDisplay').textContent = `💰 ${(tapCount * selectedBet / 100).toFixed(2)}€`;
+  document.getElementById('walletDisplay').textContent = (tapCount * selectedBet / 100).toFixed(2);
 });
 
 // --- Register ---
@@ -450,7 +469,6 @@ async function registerUser() {
       socket.emit('get_leaderboard');
       socket.emit('get_total_taps');
       
-      // Démarrer le timer si pas encore fait
       if (!timerInterval) startTimer();
       
       try { localStorage.setItem('miltape_user', JSON.stringify({ name, wallet })); } catch(e) {}
@@ -476,7 +494,6 @@ try {
       document.getElementById('tapCircle').querySelector('.lock-icon').style.display = 'none';
       updatePlayerInfo();
       
-      // Démarrer le timer
       if (!timerInterval) startTimer();
       
       setTimeout(() => {
@@ -487,7 +504,6 @@ try {
   }
 } catch(e) {}
 
-// --- Modal click outside ---
 document.getElementById('modal').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
