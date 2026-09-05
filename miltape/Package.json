@@ -1,0 +1,15 @@
+{
+  "name": "miltape",
+  "version": "1.0.0",
+  "description": "Miltape World Challenge - Tap Game",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "helmet": "^8.0.0",
+    "socket.io": "^4.8.1"
+  }
+}
